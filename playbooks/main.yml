@@ -1,0 +1,140 @@
+---
+
+
+
+
+
+
+# - name: Wait for instances to be reachable
+#   gather_facts: false
+#   hosts: all
+
+#   tasks:
+#     - name: Wait 600 seconds for target connection to become reachable/usable
+#       ansible.builtin.wait_for_connection:
+#         timeout: 300
+
+
+
+# - name: Install Grafana
+#   hosts: main
+#   become: true
+
+#   tasks:
+#     - name: Download apt key
+#       ansible.builtin.apt_key:
+#         url: https://packages.grafana.com/gpg.key
+#         state: present
+#     - name: Add grafana repo to sources.list
+#       ansible.builtin.apt_repository:
+#         repo: deb https://packages.grafana.com/oss/deb stable main
+#         filename: grafana
+#         state: present
+#     - name: Update apt cache and install grafana
+#       ansible.builtin.apt:
+#         update_cache: yes
+#         name: grafana
+#         state: present
+#     - name: Ensure Grafana is started enabled
+#       ansible.builtin.systemd:
+#         name: grafana-server
+#         enabled: yes
+#         state: started
+
+
+# - name: Install Prometheus
+#   hosts: main
+#   gather_facts: false
+#   become: true
+#   vars: 
+#     listen_ip: "1.1.1.1"
+#     listen_port: "2222"
+
+#   tasks: 
+#     - name: Get Prometheus tar.gz
+#       ansible.builtin.get_url:
+#         url: https://github.com/prometheus/prometheus/releases/download/v2.30.3/prometheus-2.30.3.linux-amd64.tar.gz
+#         dest: /etc/prometheus_zip.tar.gz
+#     - name: Unzip Prometheus tar.gz
+#       ansible.builtin.unarchive:
+#         src: /etc/prometheus_zip.tar.gz
+#         dest: /etc
+#         remote_src: yes
+#     - name: Add group named prometheus
+#       ansible.builtin.group:
+#         name: prometheus
+#         system: true
+#         state: present
+#     - name: Add user named prometheus
+#       ansible.builtin.user:
+#         name: prometheus
+#         state: present
+#         group: prometheus
+#         system: true
+#         shell: /sbin/nologin
+#       # CHECK FOR THIS ONE 
+#     - name: Create directories 
+#       ansible.builtin.file:
+#         path: "{{item.path}}"
+#         state: directory
+#         mode: "{{item.mode}}"
+#         recurse: true
+#         owner: "{{item.user}}"
+#         group: "{{item.group}}"
+#       loop:
+#         - {path: "/etc/prometheus/rules", mode: '0755', group: 'prometheus', user: 'prometheus'}
+#         - {path: "/etc/prometheus/rules.d", mode: '0755', group: 'prometheus', user: 'prometheus'}
+#         - {path: "/etc/prometheus/files_sd", mode: '0755', group: 'prometheus', user: 'prometheus'}
+#         - {path: "/var/lib/prometheus", mode: '0755', group: 'prometheus', user: 'prometheus'}
+#     - name: Copy content
+#       ansible.builtin.copy:
+#         src: "{{item.path}}"
+#         dest: "{{item.dest}}"
+#         owner: "prometheus"
+#         group: "prometheus"
+#         mode: "0644"
+#         remote_src: yes
+#       loop:
+#         - {path: "/etc/prometheus-2.30.3.linux-amd64/prometheus", dest: "/etc/prometheus"}
+#         - {path: "/etc/prometheus-2.30.3.linux-amd64/promtool", dest: "/etc/prometheus"}
+
+#     - name: Create prometheus service file
+#       ansible.builtin.copy:
+#         src: "./prometheus.service"
+#         dest: "/etc/systemd/system/prometheus.service"
+
+#     - name: Create prometheus config file 
+#       ansible.builtin.template:
+#         src: "./prometheus.yml.j2"
+#         dest: "/etc/systemd/system/prometheus.yml2"
+#         owner: prometheus
+#         group: prometheus
+#         mode: "0644"
+
+    # - name: Change directory permissions to Prometheus user and group
+    # - name: Start and enable Prometheus service
+
+- name: Install Jenkins
+  hosts: main
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Download apt key
+      ansible.builtin.apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        state: present
+    - name: Add jenkins repo to sources.list
+      ansible.builtin.apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        filename: jenkins
+        state: present
+    - name: Update apt cache and install jenkins
+      ansible.builtin.apt:
+        update_cache: yes
+        name: jenkins
+    - name: Ensure jenkins is started enabled
+      ansible.builtin.systemd:
+        name: jenkins
+        enabled: yes
+        state: started

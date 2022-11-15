@@ -1,0 +1,12 @@
+# cat  /etc/prometheus/prometheus.yml
+# Global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds.
+  scrape_timeout: 15s # scrape_timeout is set to the global default (10s).
+
+scrape_configs:
+  - job_name: "prometheus"
+
+static_configs:
+  - targets: ["{{listen_ip}}:{{listen_port}}"]
